@@ -1,6 +1,4 @@
 from bs4 import BeautifulSoup
-from urllib.request import Request, urlopen
-import re
 import time
 import sqlite3
 import requests
@@ -54,7 +52,6 @@ cur.execute('''SELECT Name From Film''')
 result = cur.fetchall()
 final_result = [i[0] for i in result]
 remaining=list(set(title_link_a)-set(final_result))
-len(remaining)
 
 count=0
 n=0
