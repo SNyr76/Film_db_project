@@ -6,18 +6,15 @@ import requests
 conn = sqlite3.connect('films.sqlite')
 cur = conn.cursor()
 
+||
+||
+## list of the headpages that lists all films  
+||
+||
+
 headpages=['List_of_films:_numbers','List_of_films:_A','List_of_films:_B','List_of_films:_C','List_of_films:_D','List_of_films:_E','List_of_films:_F','List_of_films:_G',
- 'List_of_films:_H',
- 'List_of_films:_I',
- 'List_of_films:_J–K',
- 'List_of_films:_L',
- 'List_of_films:_M',
- 'List_of_films:_N–O',
- 'List_of_films:_P',
- 'List_of_films:_Q–R',
- 'List_of_films:_S',
- 'List_of_films:_T',
- 'List_of_films:_U–W',
+ 'List_of_films:_H','List_of_films:_I','List_of_films:_J–K','List_of_films:_L','List_of_films:_M',
+ 'List_of_films:_N–O','List_of_films:_P','List_of_films:_Q–R','List_of_films:_S','List_of_films:_T','List_of_films:_U–W',
  'List_of_films:_X–Z']
 titles=[]
 title_link=[]
@@ -29,7 +26,7 @@ for i in headpages:
     soup = BeautifulSoup(content.decode('utf-8','ignore'))
     
     list_anchors=soup.findAll('a')
-    
+    ## gets titles for every film
     for tag in list_anchors:
         if tag.get('title')==None:
             continue
@@ -39,20 +36,26 @@ for i in headpages:
             titles.append(film)
             title_link.append(film_link)
     
-
-    
     print (i,"done")
     time.sleep(1)
-
+||
+||
+## storing all titles to be scraped
+||
+||
 title_link=set(title_link)
 title_link_a=list(title_link)
 
-
+## When programme restarts makes a list of films that haven't been scraped
 cur.execute('''SELECT Name From Film''')
 result = cur.fetchall()
 final_result = [i[0] for i in result]
 remaining=list(set(title_link_a)-set(final_result))
-
+||
+||
+## Looks for info box class in webpage and takes data, stores in dictionary.Stores that dictionary in films.sql db
+||
+||
 count=0
 n=0
 for link in remaining:
