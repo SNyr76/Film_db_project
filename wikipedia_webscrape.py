@@ -6,11 +6,11 @@ import requests
 conn = sqlite3.connect('films.sqlite')
 cur = conn.cursor()
 
-||
-||
+##
+##
 ## list of the headpages that lists all films  
-||
-||
+##
+##
 
 headpages=['List_of_films:_numbers','List_of_films:_A','List_of_films:_B','List_of_films:_C','List_of_films:_D','List_of_films:_E','List_of_films:_F','List_of_films:_G',
  'List_of_films:_H','List_of_films:_I','List_of_films:_J–K','List_of_films:_L','List_of_films:_M',
@@ -38,11 +38,11 @@ for i in headpages:
     
     print (i,"done")
     time.sleep(1)
-||
-||
+##
+##
 ## storing all titles to be scraped
-||
-||
+##
+##
 title_link=set(title_link)
 title_link_a=list(title_link)
 
@@ -51,11 +51,11 @@ cur.execute('''SELECT Name From Film''')
 result = cur.fetchall()
 final_result = [i[0] for i in result]
 remaining=list(set(title_link_a)-set(final_result))
-||
-||
+##
+##
 ## Looks for info box class in webpage and takes data, stores in dictionary.Stores that dictionary in films.sql db
-||
-||
+##
+##
 count=0
 n=0
 for link in remaining:
