@@ -22,7 +22,7 @@ decom['Productioncompanies'] = decom['Productioncompanies'].fillna(decom.pop('Pr
 decom['Release date']=decom['Release date'].fillna(decom.pop('Release dates'))
 decom['Release date']=decom['Release date'].fillna(decom.pop('Original release'))
 
-## wanted to get data that has budget boc office figures. Making film table for db  
+## wanted to get data that has box office figures. Making film table for db  
 
 decom=decom[(decom['Box office'].isna()==False)]
 df=pd.merge(decom,df,left_index=True, right_index=True)
@@ -31,6 +31,8 @@ film_table=df
 film_table=film_table[['name','id','Release date','Running time','Country','Language','Budget','Box office']]
 
 ### cleaning data function
+|
+|
 from datetime import datetime
 from dateutil import parser
 
@@ -92,7 +94,11 @@ def time_clean(time):
         else:
             return 'N/A'
 
+|        
+|
 ### cleaning data function
+|
+|
 def currency_clean(str_):
     str_=str(str_)
     str_=str_.lower()
@@ -185,9 +191,11 @@ def currency_clean(str_):
         return str_[0]
     except:
         return str_
-
-
-
+|
+|
+## Using functions above to clean film table data
+|
+|
 film_table['Release date'].fillna('N/A',inplace=True)
 film_table['Release date']=film_table['Release date'].apply(clean_date)
 
@@ -200,7 +208,11 @@ film_table['Budget'].fillna('N/A',inplace=True)
 film_table['Box office'].fillna('N/A',inplace=True)
 film_table['Budget']=film_table['Budget'].apply(currency_clean)
 film_table['Box office']=film_table['Box office'].apply(currency_clean)
-
+|
+|
+## reading in cpi data from a flat file for historic data adjustment
+|
+|
 cpi=pd.read_csv('cpi.csv')
 
 
@@ -210,8 +222,9 @@ current_cpi=cpi['Annual'].iloc[-1]
 
 film_table['year']=film_table['Release date'].apply(lambda x:x.split('-')[0])
 film_table=pd.merge(film_table,cpi,left_on='year',right_on='Year',how='left').set_axis(film_table.index)
-
 current_cpi=float(current_cpi)
+
+##cpi adjustment formula// try& except clause due to 'N/A' strings
 def cpi_adj(price,cpi_old):
     try:
         price = float(price[1:])
@@ -227,7 +240,7 @@ def cpi_adj(price,cpi_old):
     
     return adjusted
 
-
+## creation of adjusted columns
 cpi_vals_box=[]
 for index,row in film_table.iterrows():
     try:
@@ -252,7 +265,7 @@ film_table=film_table[['name', 'id', 'Release date', 'Running time', 'Country', 
 film_table['box_off_adj'].fillna('N/A',inplace=True)
 film_table['budget_adj'].fillna('N/A',inplace=True)
 
-
+##retrieves rows with Box office figures only as this is the main analysis point 
 film_table=film_table[(film_table['Box office']!='N/A')]
 
 ## removes scraped pages that has series/frachises combined
@@ -271,7 +284,8 @@ film_table.drop(film_table[film_table['name']=='N/A'].index,inplace=True)
 decom=decom[decom.index.isin(film_table.index)]
 
 ## function that forces string to have common delim for split.
-
+|
+|
 def common_delim(str_):
     if str_.find(',')>-1:
         return str_
@@ -294,7 +308,8 @@ def common_delim(str_):
 
 
 ## function that creates film_xx connection table and unique look up table stored both in dictionary.
-
+|
+|
 def lookup_idtable(col,c):
     output={}
     decom[col]=decom[col].apply(lambda x:str(x))
@@ -349,8 +364,11 @@ def lookup_idtable(col,c):
     film_b_id.columns=['unique_id','film_id',c+'_id']
     output['id']=film_b_id
     return output
-
+|
+|
 #### setting up connection tables used in lookup_idtable function
+|
+|
 film_table_conn= film_table[['name','id']]
 film_table_conn.columns=['film','id']
 
@@ -364,8 +382,8 @@ for table,col,id_name in zipped_list:
     inter_dict=lookup_idtable(col,id_name)
     output[table]=inter_dict
     print(table)
-
-
+|
+|
 ## Creation of all person tables ie directors/ writers etc.
 conn = sqlite3.connect('clean_film_data.sqlite')
 cur = conn.cursor()
@@ -383,8 +401,11 @@ for name_,names in zipped_list_b:
         cur.execute("INSERT INTO"+" "+names+"  (id,"+name_+") VALUES (?,?)",(row))
     conn.commit()
 cur.close()
-
-## Creation of all connector tables
+|
+|
+## Creation of all connector tables for db
+|
+|
 sqlite3.register_adapter(np.int64, int)
 conn = sqlite3.connect('clean_film_data.sqlite')
 cur = conn.cursor()
@@ -407,9 +428,11 @@ cur.close()
 
 for col in list(film_table.columns[2:]):
     film_table[col]=film_table[col].apply(lambda x:str(x))
-
-
+|
+|
 ## film information table.
+|
+|
 conn = sqlite3.connect('clean_film_data.sqlite')
 cur = conn.cursor()
 
@@ -435,3 +458,4 @@ for index, row in film_table.iterrows():
     cur.execute("INSERT INTO film_table (film, id, release_date, running_time_mins, country, language,budget, box_office,box_off_adj,budget_adj) VALUES (?,?,?,?,?,?,?,?,?,?)",(row))
 conn.commit()
 cur.close()
+
